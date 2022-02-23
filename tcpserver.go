@@ -14,26 +14,26 @@ type TcpServer struct {
 	listener *net.TCPListener
 	object   interface{}
 	shutdown chan bool
+	wg       *sync.WaitGroup
 
 	Logger *log.Logger
 	Name   string
-	WG     *sync.WaitGroup
 }
 
+// NewTcpServer will return a new TcpServer object
 func NewTcpServer(object interface{}, address string, name string) TcpServer {
 	return TcpServer{
 		address:  address,
 		object:   object,
 		shutdown: make(chan bool, 1),
+		wg:       &sync.WaitGroup{},
 		Logger:   log.New(os.Stdout, name, log.Ldate|log.Ltime|log.Lmsgprefix),
 		Name:     name,
-		WG:       &sync.WaitGroup{},
 	}
 }
 
+// Run will start serving the object via RPC over TCP
 func (ts *TcpServer) Run() error {
-	ts.WG.Add(1)
-
 	handler := rpc.NewServer()
 	err := handler.Register(ts.object)
 	if err != nil {
@@ -53,6 +53,10 @@ func (ts *TcpServer) Run() error {
 		return err
 	}
 
+	// Increment the wait group now that the object is being served
+	ts.wg.Add(1)
+
+	// Spin up a thread to serve this object
 	go func() {
 		for {
 			select {
@@ -92,9 +96,15 @@ func (ts *TcpServer) Run() error {
 	return nil
 }
 
+// Stop is called to shut down the server by decrementing the wait group
 func (ts *TcpServer) Stop() error {
 	ts.Logger.Println("Shutting down server at address %s", ts.address)
 	close(ts.shutdown)
-	ts.WG.Done()
+	ts.wg.Done()
 	return nil
+}
+
+// Wait can be called to have the code wait for the server to shut down before continuing
+func (ts *TcpServer) Wait() {
+	ts.wg.Wait()
 }

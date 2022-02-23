@@ -16,6 +16,7 @@ type TcpClient struct {
 	Name   string
 }
 
+// NewTcpClient will return a new TcpClient object
 func NewTcpClient(serverAddress string, name string) TcpClient {
 	return TcpClient{
 		serverAddress: serverAddress,
@@ -24,13 +25,16 @@ func NewTcpClient(serverAddress string, name string) TcpClient {
 	}
 }
 
+// Connect will attempt to connect this RPC client to the RPC server specified when this object was created
 func (tc *TcpClient) Connect() error {
+	// Check to make sure that TcpClient.Connect has not already been called
 	if tc.client != nil {
 		message := fmt.Sprintf("Already connected to server at address %s", tc.serverAddress)
 		tc.Logger.Println(message)
-		return nil
+		return errors.New(message)
 	}
 
+	// Make the initial connection to the RPC server
 	var err error
 	tc.client, err = rpc.Dial("tcp", tc.serverAddress)
 	if err != nil {
@@ -41,13 +45,16 @@ func (tc *TcpClient) Connect() error {
 	return nil
 }
 
+// Call will execute the specified method on the RPC server
 func (tc *TcpClient) Call(method string, request interface{}, reply interface{}) error {
+	// Check to make sure that TcpClient.Connect has already been called
 	if tc.client == nil {
 		message := fmt.Sprintf("Not connected to server at address %s : method %s", tc.serverAddress, method)
 		tc.Logger.Println(message)
 		return errors.New(message)
 	}
 
+	// Make the call to the RPC server with the specified method and associated data
 	err := tc.client.Call(method, request, reply)
 	if err != nil {
 		tc.Logger.Println("Error calling server at address: %s, method: %s", tc.serverAddress, method)
@@ -57,13 +64,16 @@ func (tc *TcpClient) Call(method string, request interface{}, reply interface{})
 	return nil
 }
 
+// Disconnect will close the TCP connection to the RPC Server
 func (tc *TcpClient) Disconnect() error {
+	// Check to make sure that TcpClient.Connect has already been called
 	if tc.client == nil {
 		message := fmt.Sprintf("Already disconnected from server at address %s", tc.serverAddress)
 		tc.Logger.Println(message)
 		return errors.New(message)
 	}
 
+	// Close the connection to the RPC server
 	err := tc.client.Close()
 	if err != nil {
 		tc.Logger.Println("Error disconnecting from server at serverAddress %s", tc.serverAddress)

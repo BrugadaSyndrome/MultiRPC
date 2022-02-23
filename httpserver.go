@@ -16,23 +16,25 @@ type HttpServer struct {
 	mux      *http.ServeMux
 	object   interface{}
 	server   *http.Server
+	wg       *sync.WaitGroup
 
 	Logger *log.Logger
 	Name   string
-	WG     *sync.WaitGroup
 }
 
+// NewHttpServer will return a new HttpServer object
 func NewHttpServer(object interface{}, address string, name string) HttpServer {
 	return HttpServer{
 		address: address,
 		mux:     http.NewServeMux(),
 		object:  object,
+		wg:      &sync.WaitGroup{},
 		Logger:  log.New(os.Stdout, name, log.Ldate|log.Ltime|log.Lmsgprefix),
 		Name:    name,
-		WG:      &sync.WaitGroup{},
 	}
 }
 
+// Run will start serving the object via RPC over HTTP
 func (hs *HttpServer) Run() error {
 	handler := rpc.NewServer()
 	err := handler.Register(hs.object)
@@ -58,7 +60,7 @@ func (hs *HttpServer) Run() error {
 	// Start the server until a stop signal is received
 	hs.server = &http.Server{Addr: hs.address, Handler: hs.mux}
 	go func() {
-		hs.WG.Add(1)
+		hs.wg.Add(1)
 
 		if err := hs.server.Serve(hs.listener); err != http.ErrServerClosed {
 			hs.Logger.Println("Error serving at address %s", hs.address)
@@ -70,12 +72,18 @@ func (hs *HttpServer) Run() error {
 	return nil
 }
 
+// Stop is called to shut down the server by decrementing the wait group
 func (hs *HttpServer) Stop() error {
 	if err := hs.server.Shutdown(context.Background()); err != nil {
 		hs.Logger.Println("Error shutting down server at address %s", hs.address)
 		return err
 	}
 	hs.Logger.Println("Shutting down server at address %s", hs.address)
-	hs.WG.Done()
+	hs.wg.Done()
 	return nil
+}
+
+// Wait can be called to have the code wait for the server to shut down before continuing
+func (hs *HttpServer) Wait() {
+	hs.wg.Wait()
 }
