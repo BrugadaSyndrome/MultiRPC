@@ -3,25 +3,21 @@ package multirpc
 import (
 	"errors"
 	"fmt"
-	"log"
+	"github.com/BrugadaSyndrome/bslogger"
 	"net/rpc"
-	"os"
 )
 
 type HttpClient struct {
-	serverAddress string
 	client        *rpc.Client
-
-	Logger *log.Logger
-	Name   string
+	logger        bslogger.Logger
+	serverAddress string
 }
 
 // NewHttpClient will return a new HttpClient object
 func NewHttpClient(serverAddress string, name string) HttpClient {
 	return HttpClient{
+		logger:        bslogger.NewLogger(name, bslogger.Normal, nil),
 		serverAddress: serverAddress,
-		Logger:        log.New(os.Stdout, name, log.Ldate|log.Ltime|log.Lmsgprefix),
-		Name:          name,
 	}
 }
 
@@ -30,7 +26,7 @@ func (hc *HttpClient) Connect() error {
 	// Check to make sure that HttpClient.Connect has not already been called
 	if hc.client != nil {
 		message := fmt.Sprintf("Already connected to server at address %s", hc.serverAddress)
-		hc.Logger.Println(message)
+		hc.logger.Error(message)
 		return errors.New(message)
 	}
 
@@ -38,10 +34,10 @@ func (hc *HttpClient) Connect() error {
 	var err error
 	hc.client, err = rpc.DialHTTP("tcp", hc.serverAddress)
 	if err != nil {
-		hc.Logger.Println("Error connecting to server at address %s : %s", hc.serverAddress, err)
+		hc.logger.Errorf("Connecting to server at address %s : %s", hc.serverAddress, err)
 		return err
 	}
-	hc.Logger.Println("Connected to server at %s", hc.serverAddress)
+	hc.logger.Infof("Connected to server at %s", hc.serverAddress)
 	return nil
 }
 
@@ -50,17 +46,17 @@ func (hc *HttpClient) Call(method string, request interface{}, reply interface{}
 	// Check to make sure that HttpClient.Connect has already been called
 	if hc.client == nil {
 		message := fmt.Sprintf("Not connected to server at address: %s, method: %s", hc.serverAddress, method)
-		hc.Logger.Println(message)
+		hc.logger.Error(message)
 		return errors.New(message)
 	}
 
 	// Make the call to the RPC server with the specified method and associated data
 	err := hc.client.Call(method, request, reply)
 	if err != nil {
-		hc.Logger.Println("Error calling server at address %s : method %s", hc.serverAddress, method)
+		hc.logger.Errorf("Calling server at address %s : method %s", hc.serverAddress, method)
 		return err
 	}
-	hc.Logger.Println("Calling server %s", method)
+	hc.logger.Infof("Calling server %s", method)
 	return nil
 }
 
@@ -69,16 +65,16 @@ func (hc *HttpClient) Disconnect() error {
 	// Check to make sure that HttpClient.Connect has already been called
 	if hc.client == nil {
 		message := fmt.Sprintf("Already disconnected from server at address %s", hc.serverAddress)
-		hc.Logger.Println(message)
+		hc.logger.Error(message)
 		return errors.New(message)
 	}
 
 	// Close the connection to the RPC server
 	err := hc.client.Close()
 	if err != nil {
-		hc.Logger.Println("Error disconnecting from server at address %s", hc.serverAddress)
+		hc.logger.Errorf("Disconnecting from server at address %s", hc.serverAddress)
 		return err
 	}
-	hc.Logger.Println("Disconnected from server at %s", hc.serverAddress)
+	hc.logger.Infof("Disconnected from server at %s", hc.serverAddress)
 	return nil
 }
