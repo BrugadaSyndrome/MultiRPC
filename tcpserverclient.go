@@ -1,4 +1,4 @@
-package rpc
+package multirpc
 
 type TcpServerClient struct {
 	Client TcpClient

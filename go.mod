@@ -1,3 +1,3 @@
-module github.com/BrugadaSyndrome/rpc
+module github.com/BrugadaSyndrome/multirpc
 
 go 1.17
