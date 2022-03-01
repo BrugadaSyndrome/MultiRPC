@@ -10,6 +10,7 @@ import (
 type TcpClient struct {
 	client        *rpc.Client
 	logger        bslogger.Logger
+	name          string
 	serverAddress string
 }
 
@@ -17,6 +18,7 @@ type TcpClient struct {
 func NewTcpClient(serverAddress string, name string) TcpClient {
 	return TcpClient{
 		logger:        bslogger.NewLogger(name, bslogger.Normal, nil),
+		name:          name,
 		serverAddress: serverAddress,
 	}
 }
@@ -77,4 +79,8 @@ func (tc *TcpClient) Disconnect() error {
 	}
 	tc.logger.Infof("Disconnected from server at %s", tc.serverAddress)
 	return nil
+}
+
+func (tc *TcpClient) Name() string {
+	return tc.name
 }

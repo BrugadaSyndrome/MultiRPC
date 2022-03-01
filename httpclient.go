@@ -10,6 +10,7 @@ import (
 type HttpClient struct {
 	client        *rpc.Client
 	logger        bslogger.Logger
+	name          string
 	serverAddress string
 }
 
@@ -17,6 +18,7 @@ type HttpClient struct {
 func NewHttpClient(serverAddress string, name string) HttpClient {
 	return HttpClient{
 		logger:        bslogger.NewLogger(name, bslogger.Normal, nil),
+		name:          name,
 		serverAddress: serverAddress,
 	}
 }
@@ -77,4 +79,8 @@ func (hc *HttpClient) Disconnect() error {
 	}
 	hc.logger.Infof("Disconnected from server at %s", hc.serverAddress)
 	return nil
+}
+
+func (hc *HttpClient) Name() string {
+	return hc.name
 }

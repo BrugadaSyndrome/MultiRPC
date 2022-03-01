@@ -12,6 +12,7 @@ type TcpServer struct {
 	address  string
 	listener *net.TCPListener
 	logger   bslogger.Logger
+	name     string
 	object   interface{}
 	shutdown chan bool
 	wg       *sync.WaitGroup
@@ -22,6 +23,7 @@ func NewTcpServer(object interface{}, address string, name string) TcpServer {
 	return TcpServer{
 		address:  address,
 		logger:   bslogger.NewLogger(name, bslogger.Normal, nil),
+		name:     name,
 		object:   object,
 		shutdown: make(chan bool, 1),
 		wg:       &sync.WaitGroup{},
@@ -103,4 +105,8 @@ func (ts *TcpServer) Stop() error {
 // Wait can be called to have the code wait for the server to shut down before continuing
 func (ts *TcpServer) Wait() {
 	ts.wg.Wait()
+}
+
+func (ts *TcpServer) Name() string {
+	return ts.name
 }

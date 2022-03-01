@@ -14,6 +14,7 @@ type HttpServer struct {
 	listener net.Listener
 	logger   bslogger.Logger
 	mux      *http.ServeMux
+	name     string
 	object   interface{}
 	server   *http.Server
 	wg       *sync.WaitGroup
@@ -25,6 +26,7 @@ func NewHttpServer(object interface{}, address string, name string) HttpServer {
 		address: address,
 		logger:  bslogger.NewLogger(name, bslogger.Normal, nil),
 		mux:     http.NewServeMux(),
+		name:    name,
 		object:  object,
 		wg:      &sync.WaitGroup{},
 	}
@@ -82,4 +84,8 @@ func (hs *HttpServer) Stop() error {
 // Wait can be called to have the code wait for the server to shut down before continuing
 func (hs *HttpServer) Wait() {
 	hs.wg.Wait()
+}
+
+func (hs *HttpServer) Name() string {
+	return hs.name
 }
