@@ -58,7 +58,7 @@ func (hc *HttpClient) Call(method string, request interface{}, reply interface{}
 		hc.logger.Errorf("Calling server at address %s : method %s", hc.serverAddress, method)
 		return err
 	}
-	hc.logger.Infof("Calling server %s", method)
+	hc.logger.Debugf("Calling server [%s] %s", hc.serverAddress, method)
 	return nil
 }
 

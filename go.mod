@@ -1,5 +1,5 @@
 module github.com/BrugadaSyndrome/multirpc
 
-go 1.19
+go 1.20
 
-require github.com/BrugadaSyndrome/bslogger v0.2.2
+require github.com/BrugadaSyndrome/bslogger v0.2.3

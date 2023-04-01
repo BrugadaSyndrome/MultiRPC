@@ -58,7 +58,7 @@ func (tc *TcpClient) Call(method string, request interface{}, reply interface{})
 		tc.logger.Errorf("Calling server at address: %s, method: %s", tc.serverAddress, method)
 		return err
 	}
-	tc.logger.Infof("Calling server [%s] %s", tc.serverAddress, method)
+	tc.logger.Debugf("Calling server [%s] %s", tc.serverAddress, method)
 	return nil
 }
 
