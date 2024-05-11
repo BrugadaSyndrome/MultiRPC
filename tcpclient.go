@@ -10,17 +10,17 @@ import (
 type TcpClient struct {
 	client        *rpc.Client
 	logger        bslogger.Logger
-	name          string
 	serverAddress string
 }
 
 // NewTcpClient will return a new TcpClient object
-func NewTcpClient(serverAddress string, name string) TcpClient {
-	return TcpClient{
-		logger:        bslogger.NewLogger(name, bslogger.Normal, nil),
-		name:          name,
+func NewTcpClient(serverAddress string) TcpClient {
+	tc := TcpClient{
+		logger:        bslogger.NewLogger(),
 		serverAddress: serverAddress,
 	}
+	tc.logger.Name = fmt.Sprintf("[Tcpclient %s]", serverAddress)
+	return tc
 }
 
 // Connect will attempt to connect this RPC client to the RPC server specified when this object was created
@@ -81,6 +81,12 @@ func (tc *TcpClient) Disconnect() error {
 	return nil
 }
 
-func (tc *TcpClient) Name() string {
-	return tc.name
+// LoggerVerbosity exposes the logger.Verbosity field
+func (tc *TcpClient) LoggerVerbosity(verbosity bslogger.Verbosity) {
+	tc.logger.Verbosity = verbosity
+}
+
+// LoggerName exposes the logger.Name field
+func (tc *TcpClient) LoggerName(name string) {
+	tc.logger.Name = name
 }

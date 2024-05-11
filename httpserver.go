@@ -2,6 +2,7 @@ package multirpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/BrugadaSyndrome/bslogger"
 	"net"
 	"net/http"
@@ -14,22 +15,22 @@ type HttpServer struct {
 	listener net.Listener
 	logger   bslogger.Logger
 	mux      *http.ServeMux
-	name     string
 	object   interface{}
 	server   *http.Server
 	wg       *sync.WaitGroup
 }
 
 // NewHttpServer will return a new HttpServer object
-func NewHttpServer(object interface{}, address string, name string) HttpServer {
-	return HttpServer{
+func NewHttpServer(object interface{}, address string) HttpServer {
+	hs := HttpServer{
 		address: address,
-		logger:  bslogger.NewLogger(name, bslogger.Normal, nil),
+		logger:  bslogger.NewLogger(),
 		mux:     http.NewServeMux(),
-		name:    name,
 		object:  object,
 		wg:      &sync.WaitGroup{},
 	}
+	hs.logger.Name = fmt.Sprintf("[HttpServer %s]", address)
+	return hs
 }
 
 // Run will start serving the object via RPC over HTTP
@@ -86,6 +87,12 @@ func (hs *HttpServer) Wait() {
 	hs.wg.Wait()
 }
 
-func (hs *HttpServer) Name() string {
-	return hs.name
+// LoggerVerbosity exposes the logger.Verbosity field
+func (hs *HttpServer) LoggerVerbosity(verbosity bslogger.Verbosity) {
+	hs.logger.Verbosity = verbosity
+}
+
+// LoggerName exposes the loggers.Name field
+func (hs *HttpServer) LoggerName(name string) {
+	hs.logger.Name = name
 }

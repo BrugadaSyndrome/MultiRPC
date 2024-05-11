@@ -5,9 +5,10 @@ type TcpServerClient struct {
 	Server TcpServer
 }
 
-func NewTcpServerClient(object interface{}, serverAddress string, serverName string, clientServerAddress string, clientName string) TcpServerClient {
-	return TcpServerClient{
-		Client: NewTcpClient(clientServerAddress, clientName),
-		Server: NewTcpServer(object, serverAddress, serverName),
+func NewTcpServerClient(object interface{}, serverAddress string, clientAddress string) TcpServerClient {
+	tsc := TcpServerClient{
+		Client: NewTcpClient(clientAddress),
+		Server: NewTcpServer(object, serverAddress),
 	}
+	return tsc
 }

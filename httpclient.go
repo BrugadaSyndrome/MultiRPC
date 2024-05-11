@@ -10,17 +10,17 @@ import (
 type HttpClient struct {
 	client        *rpc.Client
 	logger        bslogger.Logger
-	name          string
 	serverAddress string
 }
 
 // NewHttpClient will return a new HttpClient object
-func NewHttpClient(serverAddress string, name string) HttpClient {
-	return HttpClient{
-		logger:        bslogger.NewLogger(name, bslogger.Normal, nil),
-		name:          name,
+func NewHttpClient(serverAddress string) HttpClient {
+	hc := HttpClient{
+		logger:        bslogger.NewLogger(),
 		serverAddress: serverAddress,
 	}
+	hc.logger.Name = fmt.Sprintf("[HttpClient %s]", serverAddress)
+	return hc
 }
 
 // Connect will attempt to connect this RPC client to the RPC server specified when this object was created
@@ -81,6 +81,12 @@ func (hc *HttpClient) Disconnect() error {
 	return nil
 }
 
-func (hc *HttpClient) Name() string {
-	return hc.name
+// LoggerVerbosity exposes the logger.Verbosity field
+func (hc *HttpClient) LoggerVerbosity(verbosity bslogger.Verbosity) {
+	hc.logger.Verbosity = verbosity
+}
+
+// LoggerName exposes the logger.Name field
+func (hc *HttpClient) LoggerName(name string) {
+	hc.logger.Name = name
 }

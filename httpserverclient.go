@@ -5,9 +5,10 @@ type HttpServerClient struct {
 	Server HttpServer
 }
 
-func NewHttpServerClient(object interface{}, serverAddress string, serverName string, clientServerAddress string, clientName string) HttpServerClient {
-	return HttpServerClient{
-		Client: NewHttpClient(clientServerAddress, clientName),
-		Server: NewHttpServer(object, serverAddress, serverName),
+func NewHttpServerClient(object interface{}, serverAddress string, clientAddress string) HttpServerClient {
+	hsc := HttpServerClient{
+		Client: NewHttpClient(clientAddress),
+		Server: NewHttpServer(object, serverAddress),
 	}
+	return hsc
 }

@@ -1,6 +1,7 @@
 package multirpc
 
 import (
+	"fmt"
 	"github.com/BrugadaSyndrome/bslogger"
 	"net"
 	"net/rpc"
@@ -12,22 +13,22 @@ type TcpServer struct {
 	address  string
 	listener *net.TCPListener
 	logger   bslogger.Logger
-	name     string
 	object   interface{}
 	shutdown chan bool
 	wg       *sync.WaitGroup
 }
 
 // NewTcpServer will return a new TcpServer object
-func NewTcpServer(object interface{}, address string, name string) TcpServer {
-	return TcpServer{
+func NewTcpServer(object interface{}, address string) TcpServer {
+	ts := TcpServer{
 		address:  address,
-		logger:   bslogger.NewLogger(name, bslogger.Normal, nil),
-		name:     name,
+		logger:   bslogger.NewLogger(),
 		object:   object,
 		shutdown: make(chan bool, 1),
 		wg:       &sync.WaitGroup{},
 	}
+	ts.logger.Name = fmt.Sprintf("[TcpServer %s]", address)
+	return ts
 }
 
 // Run will start serving the object via RPC over TCP
@@ -107,6 +108,12 @@ func (ts *TcpServer) Wait() {
 	ts.wg.Wait()
 }
 
-func (ts *TcpServer) Name() string {
-	return ts.name
+// LoggerVerbosity exposes the logger.Verbosity field
+func (ts *TcpServer) LoggerVerbosity(verbosity bslogger.Verbosity) {
+	ts.logger.Verbosity = verbosity
+}
+
+// LoggerName exposes the logger.Name field
+func (ts *TcpServer) LoggerName(name string) {
+	ts.logger.Name = name
 }
